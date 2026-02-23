@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Molecule Builder - Interactive Chemistry Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        /* Control Panel Styles */
+        .control-panel {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .panel-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .panel-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+        }
+
+        .atom-list, .bond-list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+        }
+
+        .atom-item, .bond-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin-bottom: 5px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .atom-symbol {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            color: white;
+            margin-right: 10px;
+        }
+
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* Visualization Area */
+        .visualization-area {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .canvas-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        #moleculeCanvas {
+            width: 100%;
+            height: 400px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: crosshair;
+        }
+
+        .compound-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .compound-name {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .compound-formula {
+            font-size: 1.3em;
+            opacity: 0.9;
+        }
+
+        .presets {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .preset-btn {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .preset-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            pointer-events: none;
+            display: none;
+            z-index: 1000;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .color-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .status-bar {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .mode-indicator {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .mode-auto {
+            background: #28a745;
+            color: white;
+        }
+
+        .mode-manual {
+            background: #ffc107;
+            color: black;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧪 Molecule Builder</h1>
+            <p>Build, visualize, and identify chemical molecules interactively</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <div class="panel-section">
+                    <h3>⚛️ Add Atoms</h3>
+                    <div class="input-group">
+                        <label for="atomSymbol">Element Symbol:</label>
+                        <select id="atomSymbol">
+                            <option value="H">Hydrogen (H)</option>
+                            <option value="He">Helium (He)</option>
+                            <option value="Li">Lithium (Li)</option>
+                            <option value="Be">Beryllium (Be)</option>
+                            <option value="B">Boron (B)</option>
+                            <option value="C">Carbon (C)</option>
+                            <option value="N">Nitrogen (N)</option>
+                            <option value="O" selected>Oxygen (O)</option>
+                            <option value="F">Fluorine (F)</option>
+                            <option value="Ne">Neon (Ne)</option>
+                            <option value="Na">Sodium (Na)</option>
+                            <option value="Mg">Magnesium (Mg)</option>
+                            <option value="Al">Aluminum (Al)</option>
+                            <option value="Si">Silicon (Si)</option>
+                            <option value="P">Phosphorus (P)</option>
+                            <option value="S">Sulfur (S)</option>
+                            <option value="Cl">Chlorine (Cl)</option>
+                            <option value="Ar">Argon (Ar)</option>
+                            <option value="K">Potassium (K)</option>
+                            <option value="Ca">Calcium (Ca)</option>
+                        </select>
+                    </div>
+                    <button class="btn" onclick="addAtomFromSelector()">➕ Add Atom (Auto)</button>
+                    <button class="btn btn-info" onclick="enableManualPlacement()">✏️ Manual Placement Mode</button>
+                    <div id="modeStatus" class="status-bar">
+                        <span class="mode-indicator mode-auto">⚡ Auto Mode</span> Click canvas to place atoms manually
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>🔗 Add Bonds</h3>
+                    <div class="input-group">
+                        <label for="bondAtom1">First Atom:</label>
+                        <select id="bondAtom1"></select>
+                    </div>
+                    <div class="input-group">
+                        <label for="bondAtom2">Second Atom:</label>
+                        <select id="bondAtom2"></select>
+                    </div>
+                    <div class="input-group">
+                        <label for="bondType">Bond Type:</label>
+                        <select id="bondType">
+                            <option value="1">Single Bond</option>
+                            <option value="2">Double Bond</option>
+                            <option value="3">Triple Bond</option>
+                        </select>
+                    </div>
+                    <button class="btn" onclick="addBond()">🔗 Add Bond</button>
+                </div>
+
+                <div class="panel-section">
+                    <h3>📋 Current Atoms</h3>
+                    <div id="atomList" class="atom-list"></div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>📋 Current Bonds</h3>
+                    <div id="bondList" class="bond-list"></div>
+                </div>
+
+                <div class="panel-section">
+                    <button class="btn btn-danger" onclick="resetMolecule()">🔄 Reset All</button>
+                </div>
+
+                <div class="panel-section">
+                    <h3>🎯 Preset Molecules</h3>
+                    <div class="presets">
+                        <button class="preset-btn" onclick="loadPreset('water')">💧 Water (H₂O)</button>
+                        <button class="preset-btn" onclick="loadPreset('methane')">🔥 Methane (CH₄)</button>
+                        <button class="preset-btn" onclick="loadPreset('ammonia')">⚗️ Ammonia (NH₃)</button>
+                        <button class="preset-btn" onclick="loadPreset('co2')">🌍 CO₂</button>
+                        <button class="preset-btn" onclick="loadPreset('ethanol')">🍷 Ethanol (C₂H₅OH)</button>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item"><span class="color-box" style="background: #d3d3d3;"></span> H</div>
+                    <div class="legend-item"><span class="color-box" style="background: #333333;"></span> C</div>
+                    <div class="legend-item"><span class="color-box" style="background: #ff4444;"></span> O</div>
+                    <div class="legend-item"><span class="color-box" style="background: #4444ff;"></span> N</div>
+                    <div class="legend-item"><span class="color-box" style="background: #44ff44;"></span> Cl</div>
+                    <div class="legend-item"><span class="color-box" style="background: #ffff44;"></span> S</div>
+                </div>
+            </div>
+
+            <!-- Visualization Area -->
+            <div class="visualization-area">
+                <div class="canvas-container">
+                    <canvas id="moleculeCanvas" width="800" height="400"></canvas>
+                    <div id="tooltip" class="tooltip"></div>
+                </div>
+
+                <div class="compound-info">
+                    <div id="compoundName" class="compound-name">Empty Molecule</div>
+                    <div id="compoundFormula" class="compound-formula">Add atoms to begin</div>
+                </div>
+
+                <div style="margin-top: 20px; text-align: center; color: #6c757d;">
+                    <p>💡 <strong>Tips:</strong> Click canvas in manual mode | Double-click atoms to remove | Hover for info</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Molecule data
+        let atoms = [];
+        let bonds = [];
+        let nextAtomId = 0;
+        let manualPlacementMode = false;
+        
+        // Colors for different elements
+        const elementColors = {
+            'H': '#d3d3d3', 'He': '#d9e6f2',
+            'Li': '#b0c4de', 'Be': '#c0d6e4',
+            'B': '#f0e68c', 'C': '#333333',
+            'N': '#4444ff', 'O': '#ff4444',
+            'F': '#90e582', 'Ne': '#b3e0ff',
+            'Na': '#ab5cf2', 'Mg': '#c0e0d0',
+            'Al': '#bfb6b6', 'Si': '#d8bfd8',
+            'P': '#ff8000', 'S': '#ffff44',
+            'Cl': '#44ff44', 'Ar': '#80d1e0',
+            'K': '#8f40d4', 'Ca': '#3dff3d'
+        };
+
+        // Text colors for elements
+        const textColors = {
+            'C': '#ffffff',  // White text on black
+            'default': '#000000'  // Black text on light colors
+        };
+
+        // Common compounds database
+        const commonCompounds = {
+            'H2O': 'Water',
+            'CO2': 'Carbon Dioxide',
+            'CH4': 'Methane',
+            'NH3': 'Ammonia',
+            'C2H6O': 'Ethanol',
+            'C6H6': 'Benzene',
+            'NaCl': 'Sodium Chloride',
+            'HCl': 'Hydrochloric Acid',
+            'H2SO4': 'Sulfuric Acid',
+            'C2H4': 'Ethylene',
+            'C2H2': 'Acetylene',
+            'CH3OH': 'Methanol',
+            'C2H5OH': 'Ethanol',
+            'C6H12O6': 'Glucose',
+            'C3H8': 'Propane',
+            'C4H10': 'Butane',
+            'C2H6': 'Ethane',
+            'NH4': 'Ammonium',
+            'OH': 'Hydroxide'
+        };
+
+        // Initialize canvas and event listeners
+        window.onload = function() {
+            const canvas = document.getElementById('moleculeCanvas');
+            canvas.addEventListener('click', handleCanvasClick);
+            canvas.addEventListener('dblclick', handleCanvasDoubleClick);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            updateAtomSelects();
+            drawMolecule();
+            updateModeStatus();
+        };
+
+        function handleCanvasClick(event) {
+            if (!manualPlacementMode) return;
+            
+            const canvas = document.getElementById('moleculeCanvas');
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            const x = (event.clientX - rect.left) * scaleX;
+            const y = (event.clientY - rect.top) * scaleY;
+            
+            const symbol = document.getElementById('atomSymbol').value;
+            addAtom(symbol, x, y);
+            
+            // Turn off manual mode after placing one atom
+            manualPlacementMode = false;
+            updateModeStatus();
+        }
+
+        function handleCanvasDoubleClick(event) {
+            const canvas = document.getElementById('moleculeCanvas');
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            const x = (event.clientX - rect.left) * scaleX;
+            const y = (event.clientY - rect.top) * scaleY;
+            
+            // Find closest atom
+            let closestAtom = null;
+            let minDistance = 30;
+            
+            atoms.forEach(atom => {
+                const distance = Math.sqrt(Math.pow(atom.x - x, 2) + Math.pow(atom.y - y, 2));
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestAtom = atom;
+                }
+            });
+            
+            if (closestAtom) {
+                removeAtom(closestAtom.id);
+            }
+        }
+
+        function handleMouseMove(event) {
+            const canvas = document.getElementById('moleculeCanvas');
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            const x = (event.clientX - rect.left) * scaleX;
+            const y = (event.clientY - rect.top) * scaleY;
+            
+            // Find atom under mouse
+            let hoveredAtom = null;
+            atoms.forEach(atom => {
+                const distance = Math.sqrt(Math.pow(atom.x - x, 2) + Math.pow(atom.y - y, 2));
+                if (distance < 20) {
+                    hoveredAtom = atom;
+                }
+            });
+            
+            const tooltip = document.getElementById('tooltip');
+            if (hoveredAtom) {
+                tooltip.style.display = 'block';
+                tooltip.style.left = (event.clientX - rect.left + 10) + 'px';
+                tooltip.style.top = (event.clientY - rect.top + 10) + 'px';
+                tooltip.textContent = `${hoveredAtom.symbol} (Atom #${hoveredAtom.id})`;
+            } else {
+                tooltip.style.display = 'none';
+            }
+        }
+
+        function addAtomFromSelector() {
+            const symbol = document.getElementById('atomSymbol').value;
+            addAtom(symbol);
+        }
+
+        function addAtom(symbol, x = null, y = null) {
+            if (!symbol) {
+                alert('Please select an element');
+                return;
+            }
+
+            if (x === null || y === null) {
+                // Auto-place in a circle pattern
+                const centerX = 400;
+                const centerY = 200;
+                const radius = 150;
+                
+                if (atoms.length === 0) {
+                    // First atom goes in the center
+                    x = centerX;
+                    y = centerY;
+                } else {
+                    // Place subsequent atoms in a circle around the center
+                    const angle = (2 * Math.PI * (atoms.length - 1)) / Math.max(4, atoms.length);
+                    x = centerX + radius * Math.cos(angle);
+                    y = centerY + radius * Math.sin(angle);
+                }
+            }
+            
+            const atom = {
+                id: nextAtomId++,
+                symbol: symbol,
+                x: Math.round(x),
+                y: Math.round(y)
+            };
+            
+            atoms.push(atom);
+            updateAtomSelects();
+            updateAtomList();
+            drawMolecule();
+            updateCompoundInfo();
+        }
+
+        function removeAtom(atomId) {
+            // Remove bonds involving this atom
+            bonds = bonds.filter(bond => bond.atom1 !== atomId && bond.atom2 !== atomId);
+            
+            // Remove the atom
+            atoms = atoms.filter(atom => atom.id !== atomId);
+            
+            updateAtomSelects();
+            updateAtomList();
+            updateBondList();
+            drawMolecule();
+            updateCompoundInfo();
+        }
+
+        function addBond() {
+            const atom1Select = document.getElementById('bondAtom1');
+            const atom2Select = document.getElementById('bondAtom2');
+            
+            if (atom1Select.options.length === 0 || atom2Select.options.length === 0) {
+                alert('Add some atoms first!');
+                return;
+            }
+            
+            const atom1 = parseInt(atom1Select.value);
+            const atom2 = parseInt(atom2Select.value);
+            const bondType = parseInt(document.getElementById('bondType').value);
+            
+            if (atom1 === atom2) {
+                alert('Cannot bond an atom to itself!');
+                return;
+            }
+            
+            // Check if bond already exists
+            const existingBond = bonds.find(bond => 
+                (bond.atom1 === atom1 && bond.atom2 === atom2) ||
+                (bond.atom1 === atom2 && bond.atom2 === atom1)
+            );
+            
+            if (existingBond) {
+                alert('Bond already exists between these atoms!');
+                return;
+            }
+            
+            bonds.push({
+                atom1: atom1,
+                atom2: atom2,
+                type: bondType
+            });
+            
+            updateBondList();
+            drawMolecule();
+            updateCompoundInfo();
+        }
+
+        function removeBond(atom1, atom2) {
+            bonds = bonds.filter(bond => 
+                !(bond.atom1 === atom1 && bond.atom2 === atom2) &&
+                !(bond.atom1 === atom2 && bond.atom2 === atom1)
+            );
+            updateBondList();
+            drawMolecule();
+            updateCompoundInfo();
+        }
+
+        function enableManualPlacement() {
+            manualPlacementMode = true;
+            updateModeStatus();
+            alert('Manual placement mode activated! Click anywhere on the canvas to place the selected atom.');
+        }
+
+        function updateModeStatus() {
+            const statusBar = document.getElementById('modeStatus');
+            if (manualPlacementMode) {
+                statusBar.innerHTML = '<span class="mode-indicator mode-manual">✏️ Manual Mode</span> Click canvas to place atom';
+            } else {
+                statusBar.innerHTML = '<span class="mode-indicator mode-auto">⚡ Auto Mode</span> Click "Manual Placement" to place atoms manually';
+            }
+        }
+
+        function updateAtomSelects() {
+            const select1 = document.getElementById('bondAtom1');
+            const select2 = document.getElementById('bondAtom2');
+            
+            select1.innerHTML = '';
+            select2.innerHTML = '';
+            
+            if (atoms.length === 0) {
+                const option1 = document.createElement('option');
+                option1.textContent = 'No atoms available';
+                option1.disabled = true;
+                select1.appendChild(option1);
+                
+                const option2 = document.createElement('option');
+                option2.textContent = 'No atoms available';
+                option2.disabled = true;
+                select2.appendChild(option2);
+                return;
+            }
+            
+            atoms.forEach(atom => {
+                const option1 = document.createElement('option');
+                option1.value = atom.id;
+                option1.textContent = `${atom.symbol} (Atom #${atom.id})`;
+                select1.appendChild(option1);
+                
+                const option2 = document.createElement('option');
+                option2.value = atom.id;
+                option2.textContent = `${atom.symbol} (Atom #${atom.id})`;
+                select2.appendChild(option2);
+            });
+        }
+
+        function updateAtomList() {
+            const list = document.getElementById('atomList');
+            list.innerHTML = '';
+            
+            if (atoms.length === 0) {
+                list.innerHTML = '<div style="text-align: center; color: #999; padding: 10px;">No atoms added yet</div>';
+                return;
+            }
+            
+            atoms.forEach(atom => {
+                const item = document.createElement('div');
+                item.className = 'atom-item';
+                
+                const color = elementColors[atom.symbol] || '#ff69b4';
+                const textColor = textColors[atom.symbol] || textColors['default'];
+                
+                item.innerHTML = `
+                    <div style="display: flex; align-items: center;">
+                        <span class="atom-symbol" style="background: ${color}; color: ${textColor}">${atom.symbol}</span>
+                        <span>Atom #${atom.id}</span>
+                    </div>
+                    <button class="remove-btn" onclick="removeAtom(${atom.id})">✖</button>
+                `;
+                
+                list.appendChild(item);
+            });
+        }
+
+        function updateBondList() {
+            const list = document.getElementById('bondList');
+            list.innerHTML = '';
+            
+            if (bonds.length === 0) {
+                list.innerHTML = '<div style="text-align: center; color: #999; padding: 10px;">No bonds added yet</div>';
+                return;
+            }
+            
+            bonds.forEach(bond => {
+                const item = document.createElement('div');
+                item.className = 'bond-item';
+                
+                const bondTypes = ['', 'Single', 'Double', 'Triple'];
+                const bondSymbols = ['', '—', '═', '≡'];
+                
+                item.innerHTML = `
+                    <span>${bond.atom1} ${bondSymbols[bond.type]} ${bond.atom2} (${bondTypes[bond.type]})</span>
+                    <button class="remove-btn" onclick="removeBond(${bond.atom1}, ${bond.atom2})">✖</button>
+                `;
+                
+                list.appendChild(item);
+            });
+        }
+
+        function drawMolecule() {
+            const canvas = document.getElementById('moleculeCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (atoms.length === 0) {
+                // Draw empty state message
+                ctx.font = '16px Arial';
+                ctx.fillStyle = '#999';
+                ctx.textAlign = 'center';
+                ctx.fillText('Add atoms to start building', 400, 200);
+                return;
+            }
+            
+            // Draw bonds
+            bonds.forEach(bond => {
+                const atom1 = atoms.find(a => a.id === bond.atom1);
+                const atom2 = atoms.find(a => a.id === bond.atom2);
+                
+                if (!atom1 || !atom2) return;
+                
+                ctx.beginPath();
+                ctx.moveTo(atom1.x, atom1.y);
+                ctx.lineTo(atom2.x, atom2.y);
+                ctx.strokeStyle = '#666';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                // Draw bond type indicators
+                if (bond.type > 1) {
+                    const dx = atom2.x - atom1.x;
+                    const dy = atom2.y - atom1.y;
+                    const length = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (length > 0) {
+                        const perpX = -dy / length * 8;
+                        const perpY = dx / length * 8;
+                        
+                        if (bond.type === 2) {
+                            // Double bond
+                            ctx.beginPath();
+                            ctx.moveTo(atom1.x + perpX, atom1.y + perpY);
+                            ctx.lineTo(atom2.x + perpX, atom2.y + perpY);
+                            ctx.strokeStyle = '#999';
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+                        } else if (bond.type === 3) {
+                            // Triple bond
+                            ctx.beginPath();
+                            ctx.moveTo(atom1.x + perpX, atom1.y + perpY);
+                            ctx.lineTo(atom2.x + perpX, atom2.y + perpY);
+                            ctx.strokeStyle = '#999';
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+                            
+                            ctx.beginPath();
+                            ctx.moveTo(atom1.x - perpX, atom1.y - perpY);
+                            ctx.lineTo(atom2.x - perpX, atom2.y - perpY);
+                            ctx.strokeStyle = '#999';
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+                        }
+                    }
+                }
+            });
+            
+            // Draw atoms
+            atoms.forEach(atom => {
+                const color = elementColors[atom.symbol] || '#ff69b4';
+                const textColor = textColors[atom.symbol] || textColors['default'];
+                
+                // Draw glow effect
+                ctx.beginPath();
+                ctx.arc(atom.x, atom.y, 18, 0, 2 * Math.PI);
+                ctx.fillStyle = color + '40';
+                ctx.fill();
+                
+                // Draw atom circle
+                ctx.beginPath();
+                ctx.arc(atom.x, atom.y, 16, 0, 2 * Math.PI);
+                ctx.fillStyle = color;
+                ctx.fill();
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Draw atom symbol
+                ctx.font = 'bold 16px Arial';
+                ctx.fillStyle = textColor;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(atom.symbol, atom.x, atom.y);
+                
+                // Draw small ID for debugging (optional - comment out if not wanted)
+                // ctx.font = '10px Arial';
+                // ctx.fillStyle = '#666';
+                // ctx.fillText(atom.id, atom.x - 20, atom.y - 20);
+            });
+        }
+
+        function getMolecularFormula() {
+            const elementCount = {};
+            
+            atoms.forEach(atom => {
+                elementCount[atom.symbol] = (elementCount[atom.symbol] || 0) + 1;
+            });
+            
+            // Sort elements: C first, then H, then others alphabetically
+            const sortedElements = Object.keys(elementCount).sort((a, b) => {
+                if (a === 'C') return -1;
+                if (b === 'C') return 1;
+                if (a === 'H') return -1;
+                if (b === 'H') return 1;
+                return a.localeCompare(b);
+            });
+            
+            let formula = '';
+            sortedElements.forEach(element => {
+                const count = elementCount[element];
+                if (count === 1) {
+                    formula += element;
+                } else {
+                    formula += element + count;
+                }
+            });
+            
+            return formula;
+        }
+
+        function updateCompoundInfo() {
+            if (atoms.length === 0) {
+                document.getElementById('compoundName').textContent = 'Empty Molecule';
+                document.getElementById('compoundFormula').textContent = 'Add atoms to begin';
+                return;
+            }
+            
+            const formula = getMolecularFormula();
+            const compoundName = commonCompounds[formula] || 'Unknown Compound';
+            
+            document.getElementById('compoundName').textContent = formula;
+            document.getElementById('compoundFormula').textContent = compoundName;
+        }
+
+        function resetMolecule() {
+            if (confirm('Are you sure you want to reset everything?')) {
+                atoms = [];
+                bonds = [];
+                nextAtomId = 0;
+                manualPlacementMode = false;
+                updateAtomSelects();
+                updateAtomList();
+                updateBondList();
+                drawMolecule();
+                updateCompoundInfo();
+                updateModeStatus();
+            }
+        }
+
+        function loadPreset(preset) {
+            resetMolecule();
+            
+            switch(preset) {
+                case 'water':
+                    // H2O - Water
+                    addAtom('O', 400, 200);
+                    addAtom('H', 320, 140);
+                    addAtom('H', 320, 260);
+                    setTimeout(() => {
+                        addBond(0, 1, 1);
+                        addBond(0, 2, 1);
+                    }, 100);
+                    break;
+                    
+                case 'methane':
+                    // CH4 - Methane
+                    addAtom('C', 400, 200);
+                    addAtom('H', 300, 100);
+                    addAtom('H', 500, 100);
+                    addAtom('H', 300, 300);
+                    addAtom('H', 500, 300);
+                    setTimeout(() => {
+                        for (let i = 1; i <= 4; i++) {
+                            addBond(0, i, 1);
+                        }
+                    }, 100);
+                    break;
+                    
+                case 'ammonia':
+                    // NH3 - Ammonia
+                    addAtom('N', 400, 200);
+                    addAtom('H', 320, 120);
+                    addAtom('H', 320, 280);
+                    addAtom('H', 480, 200);
+                    setTimeout(() => {
+                        for (let i = 1; i <= 3; i++) {
+                            addBond(0, i, 1);
+                        }
+                    }, 100);
+                    break;
+                    
+                case 'co2':
+                    // CO2 - Carbon Dioxide
+                    addAtom('C', 400, 200);
+                    addAtom('O', 250, 200);
+                    addAtom('O', 550, 200);
+                    setTimeout(() => {
+                        addBond(0, 1, 2);
+                        addBond(0, 2, 2);
+                    }, 100);
+                    break;
+                    
+                case 'ethanol':
+                    // C2H5OH - Ethanol
+                    addAtom('C', 300, 150);  // C1
+                    addAtom('C', 400, 150);  // C2
+                    addAtom('O', 500, 150);  // O
+                    addAtom('H', 250, 80);   // H on C1
+                    addAtom('H', 250, 220);  // H on C1
+                    addAtom('H', 350, 80);   // H on C2
+                    addAtom('H', 350, 220);  // H on C2
+                    addAtom('H', 450, 80);   // H on C2
+                    addAtom('H', 550, 150);  // H on O
+                    
+                    setTimeout(() => {
+                        addBond(0, 1, 1); // C-C
+                        addBond(1, 2, 1); // C-O
+                        
+                        // Add H bonds
+                        addBond(0, 3, 1);
+                        addBond(0, 4, 1);
+                        addBond(1, 5, 1);
+                        addBond(1, 6, 1);
+                        addBond(1, 7, 1);
+                        addBond(2, 8, 1);
+                    }, 100);
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>
